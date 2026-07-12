@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Organize sua despensa e encontre receitas compatíveis com quantidades, equipamentos e restrições.">
+  <meta name="theme-color" content="#246b50">
+  <meta name="application-name" content="HomoSapiens Culinária">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <title>HomoSapiens — Culinária</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <noscript><div class="noscript">Este aplicativo precisa de JavaScript para calcular recomendações localmente.</div></noscript>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <header class="topbar">
+    <div>
+      <p class="brand">HomoSapiens</p>
+      <p class="product">Culinária · candidato local v1.0</p>
+    </div>
+    <div class="top-actions">
+      <button type="button" id="export-data">Exportar dados</button>
+      <label class="file-button">Importar dados
+        <input type="file" id="import-data" accept="application/json,.json">
+      </label>
+      <button type="button" id="clear-data" class="danger">Limpar dados locais</button>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <p class="eyebrow">COZINHE COM O QUE JÁ TEM</p>
+        <h1 id="hero-title">Receitas adaptadas à sua despensa, às porções e aos equipamentos disponíveis.</h1>
+        <p>O produto compara quantidades, mostra o que falta e mantém os dados apenas neste navegador.</p>
+      </div>
+      <aside class="notice" role="note">
+        <strong>Limite de segurança:</strong> os filtros reduzem resultados incompatíveis, mas não garantem ausência de traços ou contaminação cruzada. Confira rótulos e orientação profissional em alergias graves. Não improvise gás, eletricidade, pressão ou travas.
+      </aside>
+    </section>
+
+    <section class="workspace" aria-labelledby="config-title">
+      <div class="section-heading">
+        <div>
+          <p class="step">ETAPA 1</p>
+          <h2 id="config-title">Configure sua cozinha</h2>
+        </div>
+        <span class="local-badge">Dados locais</span>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <div class="card-heading">
+            <h3>Despensa</h3>
+            <div class="inline-actions"><span id="pantry-count" class="muted">0 item(ns)</span><button type="button" id="clear-pantry">Limpar</button></div>
+          </div>
+          <form id="pantry-form" class="stack">
+            <label for="ingredient">Ingrediente</label>
+            <input id="ingredient" list="ingredient-options" required maxlength="80" autocomplete="off" placeholder="Ex.: arroz">
+            <datalist id="ingredient-options">
+              <option value="arroz"></option>
+              <option value="tomate"></option>
+              <option value="cebola"></option>
+              <option value="frango"></option>
+              <option value="lentilha"></option>
+              <option value="cenoura"></option>
+              <option value="ovo"></option>
+              <option value="queijo"></option>
+              <option value="batata"></option>
+              <option value="banana"></option>
+              <option value="leite"></option>
+              <option value="grão-de-bico cozido"></option>
+              <option value="macarrão"></option>
+              <option value="alho"></option>
+              <option value="azeite"></option>
+              <option value="maçã"></option>
+              <option value="laranja"></option>
+            </datalist>
+            <div class="inline">
+              <label for="quantity">Quantidade</label>
+              <label for="unit">Unidade</label>
+              <input id="quantity" type="number" min="0.01" step="0.01" value="1" required>
+              <select id="unit">
+                <option value="un">un</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="l">l</option>
+              </select>
+            </div>
+            <button class="primary" type="submit">Adicionar à despensa</button>
+          </form>
+          <div id="pantry-list" class="pantry-list" aria-live="polite"></div>
+        </article>
+
+        <article class="card">
+          <h3>Preferências e busca</h3>
+          <div class="stack">
+            <label for="search-filter">Buscar por receita ou ingrediente</label>
+            <input id="search-filter" maxlength="100" placeholder="Ex.: arroz, tomate">
+            <div class="inline">
+              <label for="time-filter">Tempo máximo</label>
+              <label for="servings-filter">Porções</label>
+              <select id="time-filter">
+                <option value="">Sem limite</option>
+                <option value="20">Até 20 minutos</option>
+                <option value="30">Até 30 minutos</option>
+                <option value="45">Até 45 minutos</option>
+              </select>
+              <input id="servings-filter" type="number" min="1" max="12" value="2">
+            </div>
+            <label for="diet-filter">Estilo alimentar</label>
+            <select id="diet-filter">
+              <option value="">Todos</option>
+              <option value="vegano">Vegano</option>
+              <option value="vegetariano">Vegetariano</option>
+              <option value="sem_gluten">Sem glúten</option>
+            </select>
+            <label for="exclude-filter">Outros ingredientes a excluir</label>
+            <input id="exclude-filter" maxlength="200" placeholder="Separe por vírgulas">
+            <label for="sort-filter">Ordenar resultados</label>
+            <select id="sort-filter">
+              <option value="match">Melhor compatibilidade</option>
+              <option value="fastest">Mais rápidas</option>
+              <option value="least_missing">Menos faltas</option>
+              <option value="favorites_first">Favoritas primeiro</option>
+            </select>
+            <label class="toggle">
+              <input id="only-executable" type="checkbox">
+              Mostrar somente receitas executáveis com os equipamentos informados
+            </label>
+            <label class="toggle">
+              <input id="only-complete" type="checkbox">
+              Mostrar somente receitas com todos os ingredientes informados
+            </label>
+            <label class="toggle">
+              <input id="only-favorites" type="checkbox">
+              Mostrar somente receitas favoritas
+            </label>
+          </div>
+        </article>
+
+        <article class="card full">
+          <fieldset>
+            <legend>Alergênicos e exclusões rápidas</legend>
+            <p class="muted">Atalhos conservadores. Sempre confira rótulos e risco de contaminação cruzada.</p>
+            <div id="allergen-presets" class="check-grid allergen-grid"></div>
+          </fieldset>
+        </article>
+
+        <article class="card">
+          <h3>Eletrodomésticos</h3>
+          <div id="appliances" class="check-grid"></div>
+        </article>
+
+        <article class="card">
+          <h3>Utensílios</h3>
+          <div id="utensils" class="check-grid"></div>
+        </article>
+      </div>
+      <div class="action-row">
+        <button type="button" class="primary call-to-action" id="recommend">Gerar recomendações</button>
+        <button type="button" id="reset-filters">Redefinir filtros</button>
+      </div>
+    </section>
+
+    <section class="workspace" aria-labelledby="recommend-title">
+      <div class="section-heading">
+        <div>
+          <p class="step">ETAPA 2</p>
+          <h2 id="recommend-title">Recomendações</h2>
+        </div>
+      </div>
+      <p id="recommend-summary" class="muted">Configure sua cozinha e gere recomendações.</p>
+      <div id="recommendations" class="recipe-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="workspace" aria-labelledby="plan-title">
+      <div class="section-heading">
+        <div>
+          <p class="step">ETAPA 3</p>
+          <h2 id="plan-title">Cardápio e compras</h2>
+        </div>
+      </div>
+      <div id="plan-summary" class="card plan-summary" aria-live="polite"></div>
+      <div class="cards two">
+        <article class="card">
+          <div class="card-heading">
+            <h3>Cardápio</h3>
+            <button type="button" id="clear-plan">Limpar</button>
+          </div>
+          <div id="meal-plan"></div>
+        </article>
+        <article class="card">
+          <h3>Lista de compras</h3>
+          <div id="shopping-list"></div>
+          <div class="action-row compact">
+            <button type="button" id="copy-shopping">Copiar lista</button>
+            <button type="button" id="print-shopping">Imprimir</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace" aria-labelledby="history-title">
+      <div class="card">
+        <div class="card-heading">
+          <h2 id="history-title">Histórico local</h2>
+          <button type="button" id="clear-history">Limpar</button>
+        </div>
+        <div id="history"></div>
+      </div>
+    </section>
+
+    <section class="workspace limits" aria-labelledby="limits-title">
+      <h2 id="limits-title">O que este candidato faz — e o que não faz</h2>
+      <div class="cards two">
+        <article class="card">
+          <h3>Faz</h3>
+          <p>Organiza despensa, estima faltas, filtra o catálogo, adapta porções e gera uma lista de compras local.</p>
+        </article>
+        <article class="card">
+          <h3>Não faz</h3>
+          <p>Não calcula nutrição, não diagnostica alergias, não garante ausência de traços e não substitui orientação profissional.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <strong>HomoSapiens · Culinária</strong>
+    <p>Versão candidata 1.0. Nenhum dado pessoal ou da despensa é enviado a servidor.</p>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script src="./assets/app.bundle.js" defer></script>
+</body>
+</html>
