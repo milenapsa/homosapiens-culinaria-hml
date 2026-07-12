@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: homosapiens-culinaria-hml:1.0
+    container_name: homosapiens-culinaria-hml
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETGID, SETUID]
+    tmpfs: [/var/cache/nginx, /var/run]
+
+  configure:
+    image: docker:27-cli
+    container_name: homosapiens-culinaria-hml-configure
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      APP_CONTAINER: homosapiens-culinaria-hml
+      CADDY_CONTAINER: media-studio-caddy
+      HML_HOSTNAME: culinaria-hml.homosapiens.id
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - caddy_hml_backups:/backups
+      - ./ops/configure-caddy.sh:/configure-caddy.sh:ro
+    command: ["/bin/sh", "/configure-caddy.sh"]
+
+  rollback:
+    image: docker:27-cli
+    container_name: homosapiens-culinaria-hml-rollback
+    profiles: [rollback]
+    environment:
+      APP_CONTAINER: homosapiens-culinaria-hml
+      CADDY_CONTAINER: media-studio-caddy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - caddy_hml_backups:/backups
+      - ./ops/rollback-caddy.sh:/rollback-caddy.sh:ro
+    command: ["/bin/sh", "/rollback-caddy.sh"]
+
+volumes:
+  caddy_hml_backups:
