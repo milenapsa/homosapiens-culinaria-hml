@@ -1,7 +1,7 @@
 {
-  "name": "HomoSapiens Culinária",
-  "short_name": "Culinária",
-  "description": "Receitas compatíveis com despensa, porções, equipamentos e restrições, com dados locais.",
+  "name": "ChefSapiens",
+  "short_name": "ChefSapiens",
+  "description": "API de inteligência culinária desenvolvida pela HomoSapiens.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",
