@@ -1,4 +1,4 @@
-const CACHE_NAME = "homosapiens-culinaria-v1";
+const CACHE_NAME = "chefsapiens-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -20,7 +20,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(keys
-        .filter((key) => key.startsWith("homosapiens-culinaria-") && key !== CACHE_NAME)
+        .filter((key) => (key.startsWith("chefsapiens-") || key.startsWith("homosapiens-culinaria-")) && key !== CACHE_NAME)
         .map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
