@@ -28,7 +28,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - caddy_hml_backups:/backups
       - ./ops/configure-caddy.sh:/configure-caddy.sh:ro
-    command: ["/bin/sh", "-c", "/configure-caddy.sh && touch /tmp/configured && tail -f /dev/null"]
+    command: ["/bin/sh", "-c", "/bin/sh /configure-caddy.sh && touch /tmp/configured && tail -f /dev/null"]
     healthcheck:
       test: ["CMD-SHELL", "test -f /tmp/configured"]
       interval: 10s
