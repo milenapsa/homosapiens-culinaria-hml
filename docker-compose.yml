@@ -3,8 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: homosapiens-culinaria-hml:1.0
-    container_name: homosapiens-culinaria-hml
+    image: chefsapiens-hml:1.0
+    container_name: chefsapiens-hml-v1-app
     restart: unless-stopped
     read_only: true
     security_opt:
@@ -15,13 +15,13 @@ services:
 
   configure:
     image: docker:27-cli
-    container_name: homosapiens-culinaria-hml-configure
+    container_name: chefsapiens-hml-v1-configure
     depends_on:
       app:
         condition: service_healthy
     restart: unless-stopped
     environment:
-      APP_CONTAINER: homosapiens-culinaria-hml
+      APP_CONTAINER: chefsapiens-hml-v1-app
       CADDY_CONTAINER: media-studio-caddy
       HML_HOSTNAME: culinaria-hml.homosapiens.id
     volumes:
@@ -38,10 +38,10 @@ services:
 
   rollback:
     image: docker:27-cli
-    container_name: homosapiens-culinaria-hml-rollback
+    container_name: chefsapiens-hml-v1-rollback
     profiles: [rollback]
     environment:
-      APP_CONTAINER: homosapiens-culinaria-hml
+      APP_CONTAINER: chefsapiens-hml-v1-app
       CADDY_CONTAINER: media-studio-caddy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
